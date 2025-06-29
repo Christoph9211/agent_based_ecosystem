@@ -22,9 +22,11 @@ interface CameraSettings {
 }
 
 const DEFAULT_CAMERA_STATE: CameraState = {
-  position: { x: 0, y: 15, z: 15 }, // Increased height and distance for better overview
-  rotation: { pitch: -45, yaw: 45 }, // Better angle to see 3D terrain
-  zoom: 0.8, // Slightly zoomed out for wider view
+  // Centered slightly above the grid looking down from an isometric angle
+  position: { x: 0, y: 15, z: 15 },
+  // Rotation is handled by the isometric projection so start at zero
+  rotation: { pitch: 0, yaw: 0 },
+  zoom: 0.8,
 };
 
 const DEFAULT_SETTINGS: CameraSettings = {
@@ -135,13 +137,13 @@ export function useCameraControls(
     mouseState.current.lastY = e.clientY;
     
     switch (e.button) {
-      case 0: // Left button
+      case 0: // Left button - pan
         mouseState.current.isLeftDown = true;
         break;
-      case 1: // Middle button
+      case 1: // Middle button - rotate
         mouseState.current.isMiddleDown = true;
         break;
-      case 2: // Right button
+      case 2: // Right button - rotate
         mouseState.current.isRightDown = true;
         break;
     }
@@ -156,33 +158,33 @@ export function useCameraControls(
     const deltaY = e.clientY - mouseState.current.lastY;
     
     if (mouseState.current.isLeftDown) {
-      // Orbit camera rotation
-      const rotationDelta = {
-        yaw: deltaX * config.mouseSensitivity,
-        pitch: -deltaY * config.mouseSensitivity,
-      };
-      
-      setCameraState(prev => ({
-        ...prev,
-        rotation: {
-          pitch: Math.max(-89, Math.min(89, prev.rotation.pitch + rotationDelta.pitch)),
-          yaw: (prev.rotation.yaw + rotationDelta.yaw) % 360,
-        },
-      }));
-    } else if (mouseState.current.isMiddleDown || mouseState.current.isRightDown) {
-      // Camera panning
-      const panSpeed = 0.02 * (1 / cameraState.zoom); // Increased pan speed for better responsiveness
+      // Camera panning (drag with left mouse button)
+      const panSpeed = 0.02 * (1 / cameraState.zoom);
       const panDelta = {
         x: -deltaX * panSpeed,
         z: -deltaY * panSpeed,
       };
-      
+
       setCameraState(prev => ({
         ...prev,
         position: {
           x: prev.position.x + panDelta.x,
           y: prev.position.y,
           z: prev.position.z + panDelta.z,
+        },
+      }));
+    } else if (mouseState.current.isRightDown || mouseState.current.isMiddleDown) {
+      // Orbit camera rotation (drag with right or middle mouse button)
+      const rotationDelta = {
+        yaw: deltaX * config.mouseSensitivity,
+        pitch: -deltaY * config.mouseSensitivity,
+      };
+
+      setCameraState(prev => ({
+        ...prev,
+        rotation: {
+          pitch: Math.max(-89, Math.min(89, prev.rotation.pitch + rotationDelta.pitch)),
+          yaw: (prev.rotation.yaw + rotationDelta.yaw) % 360,
         },
       }));
     }
@@ -225,8 +227,8 @@ export function useCameraControls(
   // Update camera based on keyboard input
   const updateCamera = useCallback(() => {
     const keys = keysPressed.current;
-    let positionDelta = { x: 0, y: 0, z: 0 };
-    let rotationDelta = { pitch: 0, yaw: 0 };
+    const positionDelta = { x: 0, y: 0, z: 0 };
+    const rotationDelta = { pitch: 0, yaw: 0 };
     
     // Movement (WASD + QE)
     if (keys.has('KeyW')) positionDelta.z -= config.movementSpeed;
