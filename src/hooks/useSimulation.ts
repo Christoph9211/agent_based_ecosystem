@@ -314,7 +314,7 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
       const newStatistics = { ...prevState.statistics };
       
       // Create maps to track changes to avoid concurrent modification issues
-      const positionChanges: Map<string, Position> = new Map();
+      const positionChanges: Map<string, { oldPos: Position; newPos: Position }> = new Map();
       const newOrganismsToAdd: any[] = [];
       
       // Count dead organisms per cell for decomposers
@@ -377,8 +377,9 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
             
             if (validMoves.length > 0) {
               const newPos = validMoves[Math.floor(Math.random() * validMoves.length)];
+              const oldPos = { ...consumer.position };
               consumer.move(newPos);
-              positionChanges.set(consumer.id, newPos);
+              positionChanges.set(consumer.id, { oldPos, newPos });
             }
           }
           
@@ -483,8 +484,9 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
             
             if (validMoves.length > 0) {
               const newPos = validMoves[Math.floor(Math.random() * validMoves.length)];
+              const oldPos = { ...decomposer.position };
               decomposer.move(newPos);
-              positionChanges.set(decomposer.id, newPos);
+              positionChanges.set(decomposer.id, { oldPos, newPos });
             }
           }
           
@@ -526,12 +528,9 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
       }
       
       // Update positions in grid
-      for (const [id, newPos] of positionChanges.entries()) {
-        const organism = newOrganisms[id];
-        const oldPos = { x: organism.position.x, y: organism.position.y };
-        
-        gridRef.current?.moveOrganism(id, oldPos, newPos);
-        newOrganisms[id].position = newPos;
+      for (const [id, move] of positionChanges.entries()) {
+        gridRef.current?.moveOrganism(id, move.oldPos, move.newPos);
+        newOrganisms[id].position = move.newPos;
       }
       
       // Add new organisms
