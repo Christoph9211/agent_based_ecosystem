@@ -103,7 +103,7 @@ export class Environment {
     
     // Ensure values stay within reasonable bounds
     this.config.temperature = Math.max(-10, Math.min(40, this.config.temperature));
-    this.config.rainfall = Math.max(10, Math.min(100, this.config.rainfall));
+    this.config.rainfall = Math.max(10, Math.min(50, this.config.rainfall));
     this.config.sunlightIntensity = Math.max(30, Math.min(100, this.config.sunlightIntensity));
   }
 
@@ -166,7 +166,7 @@ export class Environment {
     
     // Ensure environmental values stay within bounds
     this.config.temperature = Math.max(-10, Math.min(45, this.config.temperature));
-    this.config.rainfall = Math.max(5, Math.min(100, this.config.rainfall));
+    this.config.rainfall = Math.max(5, Math.min(50, this.config.rainfall));
     this.config.pollutionLevel = Math.max(0, Math.min(100, this.config.pollutionLevel));
     
     return disturbance;

@@ -24,10 +24,10 @@ const DEFAULT_CONFIG: SimulationConfig = {
   initialProducers: 80, // Increased from 50 for stronger foundation
   initialHerbivores: 25, // Slightly increased from 20
   initialCarnivores: 8, // Increased from 5 for better balance
-  initialDecomposers: 25, // Increased from 15 for better nutrient cycling
+  initialDecomposers: 100, // Increased from 15 for better nutrient cycling
   simulationSpeed: 1,
   initialTemperature: 25,
-  initialRainfall: 60,
+  initialRainfall: 30,
   enableEvolution: true,
   enableDisturbances: false, // Disabled initially for stability
 };
@@ -53,7 +53,7 @@ const generateRandomConfig = (): SimulationConfig => {
     initialProducers: 60 + Math.floor(Math.random() * 40), // 60-100
     initialHerbivores: 15 + Math.floor(Math.random() * 20), // 15-35
     initialCarnivores: 5 + Math.floor(Math.random() * 10), // 5-15
-    initialDecomposers: 15 + Math.floor(Math.random() * 20), // 15-35
+    initialDecomposers: 50 + Math.floor(Math.random() * 20), // 15-35
     simulationSpeed: 1,
     initialTemperature: 20 + Math.random() * 10, // 20-30°C
     initialRainfall: 40 + Math.random() * 40, // 40-80%
@@ -214,13 +214,13 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
         position,
         energy: 100 + Math.random() * 30, // Higher starting energy
         size: 0.4 + Math.random() * 0.6, // Slightly larger
-        maxAge: 50 + Math.floor(Math.random() * 15), // Longer lifespan
-        reproductionRate: 0.18 + Math.random() * 0.15, // Higher reproduction
+        maxAge: 75 + Math.floor(Math.random() * 15), // Longer lifespan
+        reproductionRate: 0.25 + Math.random() * 0.15, // Higher reproduction
         reproductionEnergy: 90 + Math.random() * 40, // Lower threshold
         species: 'Decomposer',
         decompositionRate: 0.25 + Math.random() * 0.25, // Higher decomposition
-        nutrientProductionRate: 0.2 + Math.random() * 0.2, // Better nutrient production
-        movementCost: 0.4 + Math.random() * 0.2, // Lower movement cost
+        nutrientProductionRate: 0.3 + Math.random() * 0.2, // Better nutrient production
+        movementCost: 0.2 + Math.random() * 0.2, // Lower movement cost
       });
       
       organisms[decomposer.id] = decomposer.getAttributes();

@@ -10,15 +10,15 @@ import SavedSimulationsList from './components/SavedSimulationsList';
 import { Cell, DisturbanceType, SimulationConfig, SavedSimulation } from './types/types';
 
 const DEFAULT_CONFIG: SimulationConfig = {
-  gridWidth: 30,
-  gridHeight: 30,
+  gridWidth: 100,
+  gridHeight: 100,
   initialProducers: 80,
   initialHerbivores: 25,
   initialCarnivores: 8,
-  initialDecomposers: 25,
+  initialDecomposers: 50,
   simulationSpeed: 1,
   initialTemperature: 25,
-  initialRainfall: 60,
+  initialRainfall: 30,
   enableEvolution: true,
   enableDisturbances: false,
 };
