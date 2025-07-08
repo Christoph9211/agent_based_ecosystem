@@ -22,10 +22,10 @@ interface CameraSettings {
 }
 
 const DEFAULT_CAMERA_STATE: CameraState = {
-  // Centered slightly above the grid looking down from an isometric angle
-  position: { x: 0, y: 15, z: 15 },
-  // Rotation is handled by the isometric projection so start at zero
-  rotation: { pitch: 0, yaw: 0 },
+  // Start from the opposite side of the grid looking toward the center
+  position: { x: 0, y: 15, z: -15 },
+  // Rotate 180° so the camera faces the grid correctly
+  rotation: { pitch: 0, yaw: 180 },
   zoom: 0.8,
 };
 
