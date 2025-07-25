@@ -68,11 +68,15 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
   
   // Helper function to get diamond points for isometric tiles
   const getDiamondPoints = (centerX: number, centerY: number, size: number) => {
+    // Shift the center up by half a square so the diamonds align better
+    const adjustedCenterX = centerX + size * 0.25;
+    const adjustedCenterY = centerY - size * 0.25;
+    
     return [
-      { x: centerX, y: centerY - size * 0.25 }, // Top
-      { x: centerX + size * 0.5, y: centerY }, // Right
-      { x: centerX, y: centerY + size * 0.25 }, // Bottom
-      { x: centerX - size * 0.5, y: centerY }, // Left
+      { x: adjustedCenterX, y: adjustedCenterY }, // Top
+      { x: adjustedCenterX + size * 0.5, y: adjustedCenterY + size * 0.25 }, // Right
+      { x: adjustedCenterX, y: adjustedCenterY + size * 0.5 }, // Bottom
+      { x: adjustedCenterX - size * 0.5, y: adjustedCenterY + size * 0.25 }, // Left
     ];
   };
   
@@ -249,7 +253,7 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [width, height, maxSize]);
+  }, [width, height, maxSize, calculateCanvasDimensions]);
   
   // Draw ground tile based on cell properties
   const drawGroundTile = (
@@ -592,7 +596,7 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
     }
     
     // Add organisms to drawable objects
-    for (const [id, organism] of Object.entries(organisms)) {
+    for (const organism of Object.values(organisms)) {
       const { position } = organism;
       const { x, y } = position;
       
@@ -682,7 +686,7 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
       drawCellHighlight(ctx, hoverCell.x, hoverCell.y, 'rgba(255, 255, 255, 0.5)', offsetX, offsetY);
     }
     
-  }, [grid, organisms, width, height, disturbance, selectedCell, hoverCell, dimensions, cameraState, spritesReady]);
+  }, [grid, organisms, width, height, disturbance, selectedCell, hoverCell, dimensions, cameraState, spritesReady, drawCellHighlight, drawIsometricCell, drawIsometricOrganism, gridToProjected, screenToGrid]);
   
   // Handle mouse events
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {

@@ -19,7 +19,7 @@ export class Organism {
     this.id = attributes.id || uuidv4();
     this.type = attributes.type || OrganismType.Producer;
     this.position = attributes.position || { x: 0, y: 0 };
-    this.energy = attributes.energy || 100;
+    this.energy = attributes.energy || 200;
     this.size = attributes.size || 1;
     this.age = attributes.age || 0;
     this.maxAge = attributes.maxAge || 100;

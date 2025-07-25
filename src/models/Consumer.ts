@@ -15,7 +15,7 @@ export class Consumer extends Organism {
     });
 
     this.consumerType = attributes.consumerType || ConsumerType.Herbivore;
-    this.huntingEfficiency = attributes.huntingEfficiency || 0.5;
+    this.huntingEfficiency = attributes.huntingEfficiency || 0.6;
     this.metabolismRate = attributes.metabolismRate || 0.08; // Reduced from 0.1 for better energy efficiency
     this.diet = attributes.diet || [];
   }

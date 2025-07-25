@@ -23,7 +23,7 @@ const DEFAULT_CONFIG: SimulationConfig = {
   gridHeight: 30,
   initialProducers: 80, // Increased from 50 for stronger foundation
   initialHerbivores: 25, // Slightly increased from 20
-  initialCarnivores: 8, // Increased from 5 for better balance
+  initialCarnivores: 25, // Increased from 5 for better balance
   initialDecomposers: 100, // Increased from 15 for better nutrient cycling
   simulationSpeed: 1,
   initialTemperature: 25,
