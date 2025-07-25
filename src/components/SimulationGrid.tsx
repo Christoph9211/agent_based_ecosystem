@@ -128,12 +128,13 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
   };
   
   // Convert grid coordinates to projected screen coordinates with camera transformations
-  const gridToProjected = (gridX: number, gridY: number, height: number = 0): ProjectedPoint => {
+  const gridToProjected = (gridX: number, gridY: number, elevation: number = 0): ProjectedPoint => {
     const cellWorldSize = 1;
+    const verticalScale = 0.5 * cellWorldSize;
     
     // Convert to 3D world coordinates
     let worldX = gridX * cellWorldSize - (width * cellWorldSize) / 2;
-    let worldY = height;
+    let worldY = elevation * verticalScale;
     let worldZ = gridY * cellWorldSize - (height * cellWorldSize) / 2;
     
     // Apply inverse camera translation
@@ -604,7 +605,7 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
       
       const cell = grid[y] && grid[y][x] ? grid[y][x] : null;
       const cellHeight = cell ? cell.height : 0;
-      const projected = gridToProjected(x, y, cellHeight + organism.size * 0.1);
+      const projected = gridToProjected(x, y, cellHeight + organism.size * 0.5);
       drawableObjects.push({
         type: 'organism',
         gridX: x,
