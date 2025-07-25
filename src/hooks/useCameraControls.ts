@@ -19,6 +19,8 @@ interface CameraSettings {
   zoomSpeed: number;
   mouseSensitivity: number;
   damping: number;
+  maxPitchUp: number;
+  maxPitchDown: number;
 }
 
 const DEFAULT_CAMERA_STATE: CameraState = {
@@ -35,6 +37,8 @@ const DEFAULT_SETTINGS: CameraSettings = {
   zoomSpeed: 0.1,
   mouseSensitivity: 0.5,
   damping: 0.9,
+  maxPitchUp: 60,
+  maxPitchDown: -10,
 };
 
 export function useCameraControls(
@@ -183,7 +187,7 @@ export function useCameraControls(
       setCameraState(prev => ({
         ...prev,
         rotation: {
-          pitch: Math.max(-89, Math.min(89, prev.rotation.pitch + rotationDelta.pitch)),
+          pitch: Math.max(config.maxPitchDown, Math.min(config.maxPitchUp, prev.rotation.pitch + rotationDelta.pitch)),
           yaw: (prev.rotation.yaw + rotationDelta.yaw) % 360,
         },
       }));
@@ -191,7 +195,7 @@ export function useCameraControls(
     
     mouseState.current.lastX = e.clientX;
     mouseState.current.lastY = e.clientY;
-  }, [config.mouseSensitivity, cameraState.zoom]);
+  }, [config.mouseSensitivity, config.maxPitchDown, config.maxPitchUp, cameraState.zoom]);
   
   const handleMouseUp = useCallback((e: MouseEvent) => {
     if (!canvasRef.current) return;
@@ -275,7 +279,7 @@ export function useCameraControls(
           z: prev.position.z + velocities.current.position.z,
         },
         rotation: {
-          pitch: Math.max(-89, Math.min(89, prev.rotation.pitch + velocities.current.rotation.pitch)),
+          pitch: Math.max(config.maxPitchDown, Math.min(config.maxPitchUp, prev.rotation.pitch + velocities.current.rotation.pitch)),
           yaw: (prev.rotation.yaw + velocities.current.rotation.yaw) % 360,
         },
       }));
