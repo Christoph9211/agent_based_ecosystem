@@ -1,5 +1,5 @@
 import { Organism } from './Organism';
-import { OrganismType, ConsumerAttributes, ConsumerType, Position, EnvironmentConfig } from '../types/types';
+import { OrganismType, ConsumerAttributes, ConsumerType, EnvironmentConfig } from '../types/types';
 
 export class Consumer extends Organism {
   consumerType: ConsumerType;
@@ -15,7 +15,7 @@ export class Consumer extends Organism {
     });
 
     this.consumerType = attributes.consumerType || ConsumerType.Herbivore;
-    this.huntingEfficiency = attributes.huntingEfficiency || 0.6;
+    this.huntingEfficiency = attributes.huntingEfficiency || 0.85;
     this.metabolismRate = attributes.metabolismRate || 0.08; // Reduced from 0.1 for better energy efficiency
     this.diet = attributes.diet || [];
   }
