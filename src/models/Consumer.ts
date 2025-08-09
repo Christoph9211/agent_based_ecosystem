@@ -39,18 +39,18 @@ export class Consumer extends Organism {
 
     // Calculate hunting success based on hunting efficiency and size difference
     const sizeFactor = prey.size / this.size;
-    const huntingSuccess = Math.random() < (this.huntingEfficiency / (sizeFactor + 0.3)); // Improved from 0.5 to 0.3
+    const huntingSuccess = Math.random() < (this.huntingEfficiency / (sizeFactor + 0.3));
 
     if (huntingSuccess) {
-      // Energy gained from eating - efficiency depends on how well adapted the consumer is to its prey
-      const energyGain = prey.energy * 0.8; // Increased efficiency from 70% to 80%
+      // Energy gained from eating - now more efficient
+      const energyGain = prey.energy * 0.9; // Increased efficiency from 80% to 90%
       this.energy += energyGain;
       prey.die();
       return energyGain;
     }
 
-    // Failed hunt still costs energy
-    this.energy -= this.movementCost * 1.5; // Reduced cost from 2x to 1.5x
+    // Failed hunt still costs energy, but less than before
+    this.energy -= this.movementCost * 1.2; // Reduced cost from 1.5x to 1.2x
     return 0;
   }
 

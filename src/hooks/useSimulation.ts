@@ -175,7 +175,7 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
       grid.addOrganism(consumer.getAttributes());
     }
     
-    // Add carnivores - balanced for ecosystem stability
+    // Add carnivores - enhanced for resilience
     for (let i = 0; i < configToUse.initialCarnivores; i++) {
       const position = {
         x: Math.floor(Math.random() * configToUse.gridWidth),
@@ -184,16 +184,16 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
       
       const consumer = new Consumer({
         position,
-        energy: 220 + Math.random() * 80, // Higher starting energy
-        size: 1.8 + Math.random() * 1.5, // Slightly smaller
-        maxAge: 80 + Math.floor(Math.random() * 30), // Longer lifespan
-        reproductionRate: 0.04 + Math.random() * 0.06, // Slightly higher reproduction
-        reproductionEnergy: 220 + Math.random() * 40, // Lower threshold
+        energy: 250 + Math.random() * 100, // Increased starting energy
+        size: 1.8 + Math.random() * 1.5,
+        maxAge: 90 + Math.floor(Math.random() * 40), // Increased lifespan
+        reproductionRate: 0.05 + Math.random() * 0.07, // Higher reproduction rate
+        reproductionEnergy: 200 + Math.random() * 40, // Lower reproduction threshold
         species: 'Carnivore',
         consumerType: ConsumerType.Carnivore,
-        huntingEfficiency: 0.6 + Math.random() * 0.3, // Better hunting
-        metabolismRate: 0.08 + Math.random() * 0.04, // Lower metabolism
-        movementCost: 1.0 + Math.random() * 0.4, // Lower movement cost
+        huntingEfficiency: 0.7 + Math.random() * 0.25, // Higher hunting efficiency
+        metabolismRate: 0.07 + Math.random() * 0.03, // Lower metabolism for efficiency
+        movementCost: 0.9 + Math.random() * 0.3, // Lower movement cost
         diet: ['Herbivore'],
       });
       
@@ -350,29 +350,51 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
           const consumer = new Consumer(organism);
           consumer.update(environmentConfig);
           
-          // Move consumers
-          if (Math.random() < 0.8) { // 80% chance to move
-            // Find nearby cells and choose one
+          let moved = false;
+          // Carnivores actively hunt when energy is low
+          if (consumer.consumerType === ConsumerType.Carnivore && consumer.energy < consumer.reproductionEnergy * 0.9) {
+            const nearbyPrey = gridRef.current?.getNearbyOrganisms(consumer.position, 5)
+              .map(id => newOrganisms[id])
+              .filter(o => o && !o.isDead && consumer.canEat(o) && o.id !== consumer.id);
+
+            if (nearbyPrey && nearbyPrey.length > 0) {
+              let closestPrey = nearbyPrey[0];
+              let minDistance = Infinity;
+              for (const prey of nearbyPrey) {
+                const distance = Math.hypot(consumer.position.x - prey.position.x, consumer.position.y - prey.position.y);
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  closestPrey = prey;
+                }
+              }
+
+              const dx = Math.sign(closestPrey.position.x - consumer.position.x);
+              const dy = Math.sign(closestPrey.position.y - consumer.position.y);
+              
+              if (dx !== 0 || dy !== 0) {
+                const newPos = { x: consumer.position.x + dx, y: consumer.position.y + dy };
+                if (newPos.x >= 0 && newPos.x < environmentConfig.width && newPos.y >= 0 && newPos.y < environmentConfig.height) {
+                  const oldPos = { ...consumer.position };
+                  consumer.move(newPos);
+                  positionChanges.set(consumer.id, { oldPos, newPos });
+                  moved = true;
+                }
+              }
+            }
+          }
+
+          // Default random movement for herbivores or well-fed carnivores
+          if (!moved && Math.random() < 0.8) {
             const validMoves: Position[] = [];
             for (let dx = -1; dx <= 1; dx++) {
               for (let dy = -1; dy <= 1; dy++) {
                 if (dx === 0 && dy === 0) continue;
-                
-                const newPos = { 
-                  x: consumer.position.x + dx, 
-                  y: consumer.position.y + dy 
-                };
-                
-                // Check if position is valid
-                if (
-                  newPos.x >= 0 && newPos.x < environmentConfig.width &&
-                  newPos.y >= 0 && newPos.y < environmentConfig.height
-                ) {
+                const newPos = { x: consumer.position.x + dx, y: consumer.position.y + dy };
+                if (newPos.x >= 0 && newPos.x < environmentConfig.width && newPos.y >= 0 && newPos.y < environmentConfig.height) {
                   validMoves.push(newPos);
                 }
               }
             }
-            
             if (validMoves.length > 0) {
               const newPos = validMoves[Math.floor(Math.random() * validMoves.length)];
               const oldPos = { ...consumer.position };
