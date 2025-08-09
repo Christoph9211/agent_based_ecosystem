@@ -588,7 +588,14 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
       
       const cell = grid[y] && grid[y][x] ? grid[y][x] : null;
       const cellHeight = cell ? cell.height : 0;
-      const projected = gridToProjected(x, y, cellHeight + organism.size * 0.5);
+      
+      // For producers (plants/trees), the base is on the ground.
+      // For other organisms (spheres), we elevate their center.
+      const elevation = organism.type === OrganismType.Producer 
+        ? cellHeight 
+        : cellHeight + organism.size * 0.5;
+        
+      const projected = gridToProjected(x, y, elevation);
       drawableObjects.push({
         type: 'organism',
         gridX: x,
