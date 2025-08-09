@@ -8,15 +8,13 @@ import {
   DisturbanceType,
   Season,
   Position,
-  SavedSimulation,
-  Disturbance
+  SavedSimulation
 } from '../types/types';
 import { Grid } from '../models/Grid';
 import { Environment } from '../models/Environment';
 import { Producer } from '../models/Producer';
 import { Consumer } from '../models/Consumer';
 import { Decomposer } from '../models/Decomposer';
-import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_CONFIG: SimulationConfig = {
   gridWidth: 30,

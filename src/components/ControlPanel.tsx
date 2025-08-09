@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlayCircle, PauseCircle, FastForward, SkipForward, RefreshCw, Flame, Droplet, Cloud, FlaskConical, Building2, RotateCcw, Settings } from 'lucide-react';
+import { PlayCircle, PauseCircle, SkipForward, RefreshCw, Flame, Droplet, Cloud, FlaskConical, Building2, RotateCcw } from 'lucide-react';
 import { DisturbanceType, SimulationConfig } from '../types/types';
 
 interface ControlPanelProps {
@@ -49,7 +49,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onRandomRestart,
   onSave,
   onToggleAutoRestart,
-  onConfigChange,
 }) => {
   const [simulationName, setSimulationName] = useState('');
   const [disturbanceType, setDisturbanceType] = useState<DisturbanceType>(DisturbanceType.Fire);

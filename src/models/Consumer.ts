@@ -1,5 +1,5 @@
 import { Organism } from './Organism';
-import { OrganismType, ConsumerAttributes, ConsumerType, EnvironmentConfig } from '../types/types';
+import { OrganismType, ConsumerAttributes, ConsumerType, EnvironmentConfig, OrganismAttributes as IOrganismAttributes } from '../types/types';
 
 export class Consumer extends Organism {
   consumerType: ConsumerType;
@@ -54,7 +54,7 @@ export class Consumer extends Organism {
     return 0;
   }
 
-  canEat(organism: Organism): boolean {
+  canEat(organism: IOrganismAttributes): boolean {
     // Herbivores eat only producers
     if (this.consumerType === ConsumerType.Herbivore) {
       return organism.type === OrganismType.Producer;

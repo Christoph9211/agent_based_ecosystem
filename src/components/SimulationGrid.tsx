@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Cell, OrganismType, ConsumerType, DisturbanceType } from '../types/types';
-import { useCameraControls, CameraState } from '../hooks/useCameraControls';
+import { useCameraControls } from '../hooks/useCameraControls';
 
 interface SimulationGridProps {
   grid: Cell[][];
@@ -58,27 +58,13 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
   const [spritesReady, setSpritesReady] = useState(false);
   
   // Initialize camera controls
-  const { cameraState, resetCamera, toggleFullscreen, isFullscreen } = useCameraControls(canvasRef);
+  const { cameraState, isFullscreen } = useCameraControls(canvasRef);
   
   // Generate sprites programmatically
   useEffect(() => {
     // Mark sprites as ready immediately since we're drawing them programmatically
     setSpritesReady(true);
   }, []);
-  
-  // Helper function to get diamond points for isometric tiles
-  const getDiamondPoints = (centerX: number, centerY: number, size: number) => {
-    // Shift the center up by half a square so the diamonds align better
-    const adjustedCenterX = centerX + size * 0.25;
-    const adjustedCenterY = centerY - size * 0.25;
-    
-    return [
-      { x: adjustedCenterX, y: adjustedCenterY }, // Top
-      { x: adjustedCenterX + size * 0.5, y: adjustedCenterY + size * 0.25 }, // Right
-      { x: adjustedCenterX, y: adjustedCenterY + size * 0.5 }, // Bottom
-      { x: adjustedCenterX - size * 0.5, y: adjustedCenterY + size * 0.25 }, // Left
-    ];
-  };
   
   // Helper function to get ground color based on cell properties
   const getGroundColor = (cell: Cell): string => {
@@ -407,9 +393,6 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
     const topY = topProjected.screenY + offsetY;
     const baseX = baseProjected.screenX + offsetX;
     const baseY = baseProjected.screenY + offsetY;
-    
-    // Calculate the height difference in screen space
-    const heightDiff = baseY - topY;
     
     // Draw the visible side faces (front-left and front-right)
     

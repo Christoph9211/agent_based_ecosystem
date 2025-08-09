@@ -1,5 +1,5 @@
 import { Organism } from './Organism';
-import { OrganismType, ProducerAttributes, Position, EnvironmentConfig } from '../types/types';
+import { OrganismType, ProducerAttributes, EnvironmentConfig } from '../types/types';
 
 export class Producer extends Organism {
   growthRate: number;
@@ -42,7 +42,6 @@ export class Producer extends Organism {
     this.energy += energyGain;
 
     // Consume water and nutrients
-    const waterConsumption = this.waterConsumption * this.size;
     
     // Growth affects size
     if (this.energy > 110 && resourceFactor > 0.4) { // Lowered thresholds for easier growth

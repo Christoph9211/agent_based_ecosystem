@@ -1,4 +1,4 @@
-import { Cell, OrganismAttributes, OrganismType, Position, EnvironmentConfig } from '../types/types';
+import { Cell, OrganismAttributes, Position, EnvironmentConfig } from '../types/types';
 
 export class Grid {
   width: number;

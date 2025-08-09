@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Dices, Leaf, FileDown, FileUp, Info, RotateCcw, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Dices, Leaf, Info, RotateCcw } from 'lucide-react';
 import useSimulation from './hooks/useSimulation';
 import SimulationGrid from './components/SimulationGrid';
 import ControlPanel from './components/ControlPanel';
@@ -117,10 +117,10 @@ function App() {
   // Count organisms by type
   const producerCount = Object.values(state.organisms).filter(o => o.type === 'Producer').length;
   const herbivoreCount = Object.values(state.organisms).filter(
-    o => o.type === 'Consumer' && o.consumerType === 'Herbivore'
+    o => o.type === 'Consumer' && (o as any).consumerType === 'Herbivore'
   ).length;
   const carnivoreCount = Object.values(state.organisms).filter(
-    o => o.type === 'Consumer' && o.consumerType === 'Carnivore'
+    o => o.type === 'Consumer' && (o as any).consumerType === 'Carnivore'
   ).length;
   const decomposerCount = Object.values(state.organisms).filter(o => o.type === 'Decomposer').length;
   

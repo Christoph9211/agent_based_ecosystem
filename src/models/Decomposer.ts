@@ -1,5 +1,5 @@
 import { Organism } from './Organism';
-import { DecomposerAttributes, OrganismType, EnvironmentConfig } from '../types/types';
+import { DecomposerAttributes, OrganismType, EnvironmentConfig, OrganismAttributes as IOrganismAttributes } from '../types/types';
 
 export class Decomposer extends Organism {
   decompositionRate: number;
@@ -48,7 +48,7 @@ export class Decomposer extends Organism {
     return { nutrientsProduced };
   }
 
-  decompose(deadOrganism: Organism): number {
+  decompose(deadOrganism: IOrganismAttributes): number {
     if (this.isDead) return 0;
     
     // Convert dead organism into energy and nutrients

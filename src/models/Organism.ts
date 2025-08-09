@@ -30,7 +30,7 @@ export class Organism {
     this.species = attributes.species || 'Generic Organism';
   }
 
-  update(): void {
+  update(..._args: any[]): any {
     this.age += 1;
 
     // Check for death by old age

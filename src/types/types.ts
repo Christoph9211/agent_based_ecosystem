@@ -29,6 +29,7 @@ export interface OrganismAttributes {
   movementCost: number;
   isDead: boolean;
   species: string;
+  consumerType?: ConsumerType;
 }
 
 export interface ProducerAttributes extends OrganismAttributes {
