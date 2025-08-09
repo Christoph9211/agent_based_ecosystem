@@ -233,43 +233,51 @@ export function useCameraControls(
     const keys = keysPressed.current;
     const positionDelta = { x: 0, y: 0, z: 0 };
     const rotationDelta = { pitch: 0, yaw: 0 };
-    
-    // Movement (WASD + QE)
+
+    // Keyboard movement
     if (keys.has('KeyW')) positionDelta.z -= config.movementSpeed;
     if (keys.has('KeyS')) positionDelta.z += config.movementSpeed;
     if (keys.has('KeyA')) positionDelta.x -= config.movementSpeed;
     if (keys.has('KeyD')) positionDelta.x += config.movementSpeed;
     if (keys.has('KeyQ')) positionDelta.y -= config.movementSpeed;
     if (keys.has('KeyE')) positionDelta.y += config.movementSpeed;
-    
-    // Rotation (Arrow keys)
+
+    // Keyboard rotation
     if (keys.has('ArrowLeft')) rotationDelta.yaw -= config.rotationSpeed;
     if (keys.has('ArrowRight')) rotationDelta.yaw += config.rotationSpeed;
     if (keys.has('ArrowUp')) rotationDelta.pitch += config.rotationSpeed;
     if (keys.has('ArrowDown')) rotationDelta.pitch -= config.rotationSpeed;
-    
+
+    // Rotate movement vector by camera's yaw to make it relative
+    const yawRad = (cameraState.rotation.yaw * Math.PI) / 180;
+    const cosYaw = Math.cos(yawRad);
+    const sinYaw = Math.sin(yawRad);
+
+    const worldDeltaX = positionDelta.x * cosYaw - positionDelta.z * sinYaw;
+    const worldDeltaZ = positionDelta.x * sinYaw + positionDelta.z * cosYaw;
+
     // Apply velocities with acceleration
-    velocities.current.position.x += positionDelta.x * 0.1;
+    velocities.current.position.x += worldDeltaX * 0.1;
     velocities.current.position.y += positionDelta.y * 0.1;
-    velocities.current.position.z += positionDelta.z * 0.1;
+    velocities.current.position.z += worldDeltaZ * 0.1;
     velocities.current.rotation.pitch += rotationDelta.pitch * 0.1;
     velocities.current.rotation.yaw += rotationDelta.yaw * 0.1;
-    
-    // Apply damping
+
+    // Apply damping to create smooth movement
     velocities.current.position.x *= config.damping;
     velocities.current.position.y *= config.damping;
     velocities.current.position.z *= config.damping;
     velocities.current.rotation.pitch *= config.damping;
     velocities.current.rotation.yaw *= config.damping;
-    
-    // Update camera state if there's movement
-    const hasMovement = 
+
+    // Update camera state if there is movement
+    const hasMovement =
       Math.abs(velocities.current.position.x) > 0.001 ||
       Math.abs(velocities.current.position.y) > 0.001 ||
       Math.abs(velocities.current.position.z) > 0.001 ||
       Math.abs(velocities.current.rotation.pitch) > 0.001 ||
       Math.abs(velocities.current.rotation.yaw) > 0.001;
-    
+
     if (hasMovement) {
       setCameraState(prev => ({
         ...prev,
@@ -284,9 +292,9 @@ export function useCameraControls(
         },
       }));
     }
-    
+
     animationFrameRef.current = requestAnimationFrame(updateCamera);
-  }, [config]);
+  }, [config, cameraState.rotation.yaw]);
   
   // Set up event listeners
   useEffect(() => {

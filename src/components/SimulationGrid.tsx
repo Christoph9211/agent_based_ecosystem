@@ -179,7 +179,7 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
     
     return {
       screenX: x_rotated * cameraState.zoom * cellSize,
-      screenY: -y_rotated * cameraState.zoom * cellSize,
+      screenY: y_rotated * cameraState.zoom * cellSize,
       depth: z_rotated
     };
   };
