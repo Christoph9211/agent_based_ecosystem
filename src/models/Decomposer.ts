@@ -9,22 +9,22 @@ export class Decomposer extends Organism {
     super({
       ...attributes,
       type: OrganismType.Decomposer,
-      species: attributes.species || 'Basic Decomposer',
+      species: attributes.species || 'Resilient Decomposer',
     });
 
-    this.decompositionRate = attributes.decompositionRate || 0.35; // Increased from 0.3 for better decomposition
-    this.nutrientProductionRate = attributes.nutrientProductionRate || 0.25; // Increased from 0.2 for better nutrient cycling
+    this.decompositionRate = attributes.decompositionRate || 0.4; // Increased from 0.35
+    this.nutrientProductionRate = attributes.nutrientProductionRate || 0.3; // Increased from 0.25
   }
 
   update(environmentConfig: EnvironmentConfig, deadOrganismCount: number): { nutrientsProduced: number } {
     super.update();
     if (this.isDead) return { nutrientsProduced: 0 };
 
-    // Decomposers thrive in environments with dead matter
-    const deadMatterFactor = Math.min(1, deadOrganismCount / 4); // Reduced threshold from 5 to 4
+    // Decomposers thrive in environments with dead matter, now more efficiently
+    const deadMatterFactor = Math.min(1, deadOrganismCount / 3); // Reduced threshold from 4
     
     // Environmental factors affecting decomposition
-    const moistureFactor = Math.max(0.3, environmentConfig.rainfall / 100); // Minimum moisture factor
+    const moistureFactor = Math.max(0.4, environmentConfig.rainfall / 100); // Increased minimum moisture factor
     const temperatureFactor = this.getTemperatureFactor(environmentConfig.temperature);
     
     // Calculate decomposition efficiency
@@ -32,17 +32,17 @@ export class Decomposer extends Organism {
       this.decompositionRate * deadMatterFactor * moistureFactor * temperatureFactor;
     
     // Energy gained from decomposition
-    const energyGain = decompositionEfficiency * 12 * deadOrganismCount; // Increased from 10 to 12
+    const energyGain = decompositionEfficiency * 15 * deadOrganismCount; // Increased from 12
     this.energy += energyGain;
     
     // Nutrients produced from decomposition
     const nutrientsProduced = 
       this.nutrientProductionRate * decompositionEfficiency * deadOrganismCount;
     
-    // Growth based on available resources
-    if (this.energy > 130 && deadMatterFactor > 0.25) { // Lowered thresholds
-      this.size += 0.06 * deadMatterFactor; // Increased growth rate
-      this.energy -= 4; // Reduced energy cost from 5 to 4
+    // Growth based on available resources, now easier to achieve
+    if (this.energy > 110 && deadMatterFactor > 0.2) { // Lowered thresholds from 130 and 0.25
+      this.size += 0.07 * deadMatterFactor; // Increased growth rate from 0.06
+      this.energy -= 3; // Reduced energy cost from 4
     }
 
     return { nutrientsProduced };
@@ -51,8 +51,8 @@ export class Decomposer extends Organism {
   decompose(deadOrganism: IOrganismAttributes): number {
     if (this.isDead) return 0;
     
-    // Convert dead organism into energy and nutrients
-    const energyGain = deadOrganism.size * 6 * this.decompositionRate; // Increased from 5 to 6
+    // Convert dead organism into energy and nutrients more effectively
+    const energyGain = deadOrganism.size * 8 * this.decompositionRate; // Increased from 6
     this.energy += energyGain;
     
     // Return nutrients produced
@@ -60,20 +60,20 @@ export class Decomposer extends Organism {
   }
 
   private getTemperatureFactor(temperature: number): number {
-    // Decomposition rate increases with temperature, up to a point
-    if (temperature < 0) return 0.2; // Increased from 0.1 for better cold tolerance
-    if (temperature > 40) return 0.6; // Increased from 0.5 for better heat tolerance
+    // Decomposition rate increases with temperature, with a wider optimal range
+    if (temperature < 0) return 0.3; // Increased from 0.2 for better cold tolerance
+    if (temperature > 45) return 0.5; // Increased from 0.6 and 40 for better heat tolerance
     
-    // Optimal range is 15-35 degrees
-    if (temperature >= 15 && temperature <= 35) {
+    // Wider optimal range is 10-38 degrees
+    if (temperature >= 10 && temperature <= 38) {
       return 1.0;
     }
     
     // Linear scaling between ranges
-    if (temperature < 15) {
-      return 0.2 + (temperature / 15) * 0.8; // Improved cold performance
-    } else {
-      return 1.0 - ((temperature - 35) / 10) * 0.4; // Improved heat performance
+    if (temperature < 10) {
+      return 0.3 + (temperature / 10) * 0.7; // Improved cold performance scaling
+    } else { // temperature is between 38 and 45
+      return 1.0 - ((temperature - 38) / 7) * 0.5; // Improved heat performance scaling
     }
   }
 
