@@ -708,8 +708,8 @@ const SimulationGrid: React.FC<SimulationGridProps> = ({
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
             <div className="font-semibold mb-1">Mouse Controls:</div>
-            <div>Left Drag: Orbit</div>
-            <div>Right/Middle: Pan</div>
+            <div>Left Drag: Pan</div>
+            <div>Right/Middle: Orbit</div>
             <div>Wheel: Zoom</div>
           </div>
           <div>

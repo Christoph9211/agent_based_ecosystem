@@ -164,17 +164,23 @@ export function useCameraControls(
     if (mouseState.current.isLeftDown) {
       // Camera panning (drag with left mouse button)
       const panSpeed = 0.02 * (1 / cameraState.zoom);
-      const panDelta = {
-        x: -deltaX * panSpeed,
-        z: -deltaY * panSpeed,
-      };
+      const panDeltaX = -deltaX * panSpeed;
+      const panDeltaZ = -deltaY * panSpeed;
+
+      // Rotate pan vector by camera's yaw to make it relative to the camera's orientation
+      const yawRad = (cameraState.rotation.yaw * Math.PI) / 180;
+      const cosYaw = Math.cos(yawRad);
+      const sinYaw = Math.sin(yawRad);
+
+      const worldDeltaX = panDeltaX * cosYaw - panDeltaZ * sinYaw;
+      const worldDeltaZ = panDeltaX * sinYaw + panDeltaZ * cosYaw;
 
       setCameraState(prev => ({
         ...prev,
         position: {
-          x: prev.position.x + panDelta.x,
+          x: prev.position.x + worldDeltaX,
           y: prev.position.y,
-          z: prev.position.z + panDelta.z,
+          z: prev.position.z + worldDeltaZ,
         },
       }));
     } else if (mouseState.current.isRightDown || mouseState.current.isMiddleDown) {
@@ -195,7 +201,7 @@ export function useCameraControls(
     
     mouseState.current.lastX = e.clientX;
     mouseState.current.lastY = e.clientY;
-  }, [config.mouseSensitivity, config.maxPitchDown, config.maxPitchUp, cameraState.zoom]);
+  }, [config.mouseSensitivity, config.maxPitchDown, config.maxPitchUp, cameraState.zoom, cameraState.rotation.yaw]);
   
   const handleMouseUp = useCallback((e: MouseEvent) => {
     if (!canvasRef.current) return;

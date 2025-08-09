@@ -1,5 +1,48 @@
 import { Cell, OrganismAttributes, Position, EnvironmentConfig } from '../types/types';
 
+// A simple value noise generator to create natural-looking terrain
+function createNoiseGenerator(width: number, height: number, featureSize: number) {
+  const grid: number[][] = [];
+  const gridW = Math.ceil(width / featureSize) + 1;
+  const gridH = Math.ceil(height / featureSize) + 1;
+
+  for (let y = 0; y < gridH; y++) {
+    grid[y] = [];
+    for (let x = 0; x < gridW; x++) {
+      grid[y][x] = Math.random();
+    }
+  }
+
+  function smoothstep(t: number) {
+    return t * t * (3 - 2 * t);
+  }
+
+  function interpolate(a: number, b: number, t: number) {
+    return a * (1 - t) + b * t;
+  }
+
+  return function getValue(x: number, y: number) {
+    const xf = x / featureSize;
+    const yf = y / featureSize;
+
+    const x0 = Math.floor(xf);
+    const y0 = Math.floor(yf);
+    
+    const tx = smoothstep(xf - x0);
+    const ty = smoothstep(yf - y0);
+
+    const v00 = grid[y0][x0];
+    const v10 = grid[y0][x0 + 1];
+    const v01 = grid[y0 + 1][x0];
+    const v11 = grid[y0 + 1][x0 + 1];
+
+    const i1 = interpolate(v00, v10, tx);
+    const i2 = interpolate(v01, v11, tx);
+
+    return interpolate(i1, i2, ty);
+  };
+}
+
 export class Grid {
   width: number;
   height: number;
@@ -13,82 +56,58 @@ export class Grid {
 
   private initializeGrid(environmentConfig: EnvironmentConfig): Cell[][] {
     const grid: Cell[][] = [];
-    
+
+    // Create multiple layers of noise for more interesting terrain
+    const largeFeatures = createNoiseGenerator(this.width, this.height, this.width / 2);
+    const mediumFeatures = createNoiseGenerator(this.width, this.height, this.width / 4);
+    const smallFeatures = createNoiseGenerator(this.width, this.height, this.width / 10);
+
     for (let y = 0; y < this.height; y++) {
       const row: Cell[] = [];
-      
       for (let x = 0; x < this.width; x++) {
-        // Create terrain variations
+        // Combine noise layers for a more natural look
+        const n1 = largeFeatures(x, y);  // Large landmasses
+        const n2 = mediumFeatures(x, y); // Hills and valleys
+        const n3 = smallFeatures(x, y);  // Small details
+
+        let elevation = (n1 * 0.6) + (n2 * 0.3) + (n3 * 0.1);
+
+        // Create a circular island falloff to ensure water at the edges
         const distanceFromCenter = Math.sqrt(
-          Math.pow(x - this.width / 2, 2) + Math.pow(y - this.height / 2, 2)
+            Math.pow(x - this.width / 2, 2) + Math.pow(y - this.height / 2, 2)
         );
-        const normalizedDistance = distanceFromCenter / (Math.sqrt(Math.pow(this.width / 2, 2) + Math.pow(this.height / 2, 2)));
+        const maxDist = Math.min(this.width, this.height) / 2;
+        const islandFactor = Math.max(0, 1 - (distanceFromCenter / maxDist));
         
-        // Generate elevation using multiple techniques for varied terrain
-        let cellHeight = 0;
+        elevation *= Math.pow(islandFactor, 1.2); // Apply falloff, stronger at the edges
         
-        // Central island - create a large elevated area in the center
-        const centerX = this.width / 2;
-        const centerY = this.height / 2;
-        const islandRadius = Math.min(this.width, this.height) * 0.25;
-        const distanceFromIslandCenter = Math.sqrt(
-          Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
-        );
-        
-        if (distanceFromIslandCenter < islandRadius) {
-          // Create a smooth elevation gradient for the central island
-          const elevationFactor = 1 - (distanceFromIslandCenter / islandRadius);
-          cellHeight = Math.max(cellHeight, elevationFactor * 2.5); // Max height of 2.5 units
-        }
-        
-        // Add some smaller hills scattered around
-        const numHills = 3;
-        for (let i = 0; i < numHills; i++) {
-          const hillX = (this.width * 0.2) + (Math.random() * this.width * 0.6);
-          const hillY = (this.height * 0.2) + (Math.random() * this.height * 0.6);
-          const hillRadius = 3 + Math.random() * 5;
-          const distanceFromHill = Math.sqrt(
-            Math.pow(x - hillX, 2) + Math.pow(y - hillY, 2)
-          );
-          
-          if (distanceFromHill < hillRadius) {
-            const hillElevationFactor = 1 - (distanceFromHill / hillRadius);
-            cellHeight = Math.max(cellHeight, hillElevationFactor * (0.8 + Math.random() * 1.2));
-          }
-        }
-        
-        // Add some noise for natural variation
-        cellHeight += (Math.random() - 0.5) * 0.3;
-        cellHeight = Math.max(0, cellHeight); // Ensure no negative heights
-        
+        // Scale and shape elevation to create flatter plains and steeper mountains
+        let cellHeight = Math.pow(elevation, 2) * 4.5;
+        cellHeight = Math.max(0, cellHeight);
+
         // More nutrients and water in lower areas, less at higher elevations
         const baseNutrients = 50 + Math.random() * 50;
-        const elevationNutrientPenalty = cellHeight * 15; // Higher areas have fewer nutrients
-        const nutrientVariation = 1 - normalizedDistance * 0.3;
+        const elevationNutrientPenalty = cellHeight * 15;
         
         const baseWater = environmentConfig.rainfall * 0.8 + Math.random() * 20;
-        const elevationWaterPenalty = cellHeight * 25; // Higher areas have much less water
-        const waterVariation = 1 - normalizedDistance * 0.2;
+        const elevationWaterPenalty = cellHeight * 25;
         
-        // Calculate final nutrient and water levels
-        const finalNutrients = Math.max(10, (baseNutrients - elevationNutrientPenalty) * nutrientVariation);
-        const finalWater = Math.max(5, (baseWater - elevationWaterPenalty) * waterVariation);
-        
+        const finalNutrients = Math.max(10, baseNutrients - elevationNutrientPenalty);
+        const finalWater = Math.max(5, baseWater - elevationWaterPenalty);
+
         row.push({
-          x,
-          y,
-          height: cellHeight,
-          nutrientLevel: finalNutrients,
-          waterLevel: finalWater,
-          organisms: [],
-          temperature: environmentConfig.temperature + (Math.random() * 4 - 2), // Slight temperature variations
-          pollutionLevel: environmentConfig.pollutionLevel * (0.8 + Math.random() * 0.4),
+            x,
+            y,
+            height: cellHeight,
+            nutrientLevel: finalNutrients,
+            waterLevel: finalWater,
+            organisms: [],
+            temperature: environmentConfig.temperature + (Math.random() * 4 - 2),
+            pollutionLevel: environmentConfig.pollutionLevel * (0.8 + Math.random() * 0.4),
         });
       }
-      
       grid.push(row);
     }
-    
     return grid;
   }
 
