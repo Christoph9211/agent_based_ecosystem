@@ -3,7 +3,7 @@ import { Cell, OrganismType, ConsumerType } from '../types/types';
 
 interface CellDetailsProps {
   cell: Cell | null;
-  organisms: Record<string, any>;
+  organisms: Record<string, { id: string; type: OrganismType; consumerType?: ConsumerType; energy: number; size: number; age: number; maxAge: number; species: string }>;
 }
 
 const CellDetails: React.FC<CellDetailsProps> = ({ cell, organisms }) => {
@@ -126,7 +126,7 @@ const CellDetails: React.FC<CellDetailsProps> = ({ cell, organisms }) => {
           <h4 className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-1">Details</h4>
           
           <div className="max-h-40 overflow-y-auto text-xs">
-            {cellOrganisms.slice(0, 8).map((organism, index) => (
+            {cellOrganisms.slice(0, 8).map((organism) => (
               <div key={organism.id} className="mb-2 pb-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
                 <div className="font-semibold text-gray-700 dark:text-gray-200">{organism.species}</div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">

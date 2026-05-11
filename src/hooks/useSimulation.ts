@@ -9,14 +9,15 @@ import {
   Season,
   Position,
   SavedSimulation,
-  Disturbance
+  OrganismAttributes,
+  ConsumerAttributes
 } from '../types/types';
 import { Grid } from '../models/Grid';
 import { Environment } from '../models/Environment';
+import { Organism } from '../models/Organism';
 import { Producer } from '../models/Producer';
 import { Consumer } from '../models/Consumer';
 import { Decomposer } from '../models/Decomposer';
-import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_CONFIG: SimulationConfig = {
   gridWidth: 30,
@@ -126,7 +127,7 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
     gridRef.current = grid;
     
     // Initialize organisms
-    const organisms: Record<string, any> = {};
+    const organisms: Record<string, OrganismAttributes> = {};
     
     // Add producers (plants) - improved parameters for stability
     for (let i = 0; i < configToUse.initialProducers; i++) {
@@ -243,13 +244,13 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
   }, [config]);
   
   // Check for extinction and handle auto-restart
-  const checkForExtinction = useCallback((newOrganisms: Record<string, any>, currentDay: number) => {
+  const checkForExtinction = useCallback((newOrganisms: Record<string, OrganismAttributes>, currentDay: number) => {
     const producerCount = Object.values(newOrganisms).filter(o => o.type === OrganismType.Producer).length;
     const herbivoreCount = Object.values(newOrganisms).filter(
-      o => o.type === OrganismType.Consumer && (o as any).consumerType === ConsumerType.Herbivore
+      o => o.type === OrganismType.Consumer && 'consumerType' in o && (o as ConsumerAttributes).consumerType === ConsumerType.Herbivore
     ).length;
     const carnivoreCount = Object.values(newOrganisms).filter(
-      o => o.type === OrganismType.Consumer && (o as any).consumerType === ConsumerType.Carnivore
+      o => o.type === OrganismType.Consumer && 'consumerType' in o && (o as ConsumerAttributes).consumerType === ConsumerType.Carnivore
     ).length;
     const decomposerCount = Object.values(newOrganisms).filter(o => o.type === OrganismType.Decomposer).length;
     
@@ -315,7 +316,7 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
       
       // Create maps to track changes to avoid concurrent modification issues
       const positionChanges: Map<string, { oldPos: Position; newPos: Position }> = new Map();
-      const newOrganismsToAdd: any[] = [];
+      const newOrganismsToAdd: Organism[] = [];
       
       // Count dead organisms per cell for decomposers
       const deadOrganismsCounts: Record<string, number> = {};
@@ -397,10 +398,12 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
               const targetId = nearbyProducers[Math.floor(Math.random() * nearbyProducers.length)];
               const target = newOrganisms[targetId];
               
-              if (target && consumer.canEat(target)) {
+              if (target) {
                 const targetInstance = new Producer(target);
-                consumer.eat(targetInstance);
-                newOrganisms[targetId] = targetInstance.getAttributes();
+                if (consumer.canEat(targetInstance)) {
+                  consumer.eat(targetInstance);
+                  newOrganisms[targetId] = targetInstance.getAttributes();
+                }
               }
             }
           } 
@@ -420,10 +423,12 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
               const target = newOrganisms[targetId];
               
               // Check if target is valid prey (herbivores eat plants, carnivores eat herbivores)
-              if (target && consumer.canEat(target)) {
+              if (target) {
                 const targetInstance = new Consumer(target);
-                consumer.eat(targetInstance);
-                newOrganisms[targetId] = targetInstance.getAttributes();
+                if (consumer.canEat(targetInstance)) {
+                  consumer.eat(targetInstance);
+                  newOrganisms[targetId] = targetInstance.getAttributes();
+                }
               }
             }
           }
@@ -502,7 +507,9 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
             if (cellOrganisms.length > 0) {
               const targetId = cellOrganisms[Math.floor(Math.random() * cellOrganisms.length)];
               if (newOrganisms[targetId]) {
-                const nutrients = decomposer.decompose(newOrganisms[targetId]);
+                // Create organism instance for decomposition
+                const targetOrganism = new Organism(newOrganisms[targetId]);
+                const nutrients = decomposer.decompose(targetOrganism);
                 gridRef.current?.addNutrients(decomposer.position, nutrients);
                 
                 // Mark this organism for removal
@@ -550,10 +557,10 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
       // Update statistics
       const producerCount = Object.values(newOrganisms).filter(o => o.type === OrganismType.Producer).length;
       const herbivoreCount = Object.values(newOrganisms).filter(
-        o => o.type === OrganismType.Consumer && (o as any).consumerType === ConsumerType.Herbivore
+        o => o.type === OrganismType.Consumer && 'consumerType' in o && (o as ConsumerAttributes).consumerType === ConsumerType.Herbivore
       ).length;
       const carnivoreCount = Object.values(newOrganisms).filter(
-        o => o.type === OrganismType.Consumer && (o as any).consumerType === ConsumerType.Carnivore
+        o => o.type === OrganismType.Consumer && 'consumerType' in o && (o as ConsumerAttributes).consumerType === ConsumerType.Carnivore
       ).length;
       const decomposerCount = Object.values(newOrganisms).filter(o => o.type === OrganismType.Decomposer).length;
       
@@ -618,8 +625,8 @@ export function useSimulation(initialConfig: Partial<SimulationConfig> = {}) {
       if (newStatistics.producers.length > 500) {
         for (const key in newStatistics) {
           if (Array.isArray(newStatistics[key as keyof SimulationStatistics])) {
-            (newStatistics[key as keyof SimulationStatistics] as any) = 
-              (newStatistics[key as keyof SimulationStatistics] as any).slice(-500);
+            (newStatistics[key as keyof SimulationStatistics] as number[]) = 
+              (newStatistics[key as keyof SimulationStatistics] as number[]).slice(-500);
           }
         }
       }

@@ -17,6 +17,7 @@ export interface Position {
 }
 
 export interface OrganismAttributes {
+  consumerType: ConsumerType;
   id: string;
   type: OrganismType;
   position: Position;

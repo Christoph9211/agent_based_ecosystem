@@ -81,6 +81,7 @@ export class Organism {
 
   getAttributes(): OrganismAttributes {
     return {
+      consumerType: this.type === OrganismType.Consumer ? (this as any).consumerType : undefined,
       id: this.id,
       type: this.type,
       position: this.position,

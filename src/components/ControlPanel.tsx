@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { PlayCircle, PauseCircle, FastForward, SkipForward, RefreshCw, Flame, Droplet, Cloud, FlaskConical, Building2, RotateCcw, Settings } from 'lucide-react';
-import { DisturbanceType, SimulationConfig } from '../types/types';
+import { PlayCircle, PauseCircle, SkipForward, RefreshCw, Flame, Droplet, Cloud, FlaskConical, Building2, RotateCcw } from 'lucide-react';
+import { DisturbanceType } from '../types/types';
 
 interface ControlPanelProps {
   day: number;
@@ -24,7 +24,7 @@ interface ControlPanelProps {
   onRandomRestart: () => void;
   onSave: (name: string) => void;
   onToggleAutoRestart: () => void;
-  onConfigChange: (config: Partial<SimulationConfig>) => void;
+
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -49,7 +49,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onRandomRestart,
   onSave,
   onToggleAutoRestart,
-  onConfigChange,
+
 }) => {
   const [simulationName, setSimulationName] = useState('');
   const [disturbanceType, setDisturbanceType] = useState<DisturbanceType>(DisturbanceType.Fire);
@@ -82,6 +82,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button 
             onClick={onPauseToggle}
             className="focus:outline-none text-primary-600 dark:text-primary-400"
+            title={paused ? "Play simulation" : "Pause simulation"}
           >
             {paused ? (
               <PlayCircle size={32} className="text-primary-600" />
@@ -91,6 +92,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           </button>
           
           <button 
+            title="Step forward"
             onClick={onStepForward}
             className="focus:outline-none text-primary-600 dark:text-primary-400"
             disabled={!paused}
@@ -111,6 +113,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               value={speed}
               onChange={handleSpeedChange}
               className="w-24"
+              title="Simulation speed"
             />
             <span className="text-sm font-semibold text-primary-700 dark:text-primary-400">{speed}x</span>
           </div>
@@ -215,6 +218,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               value={disturbanceType}
               onChange={(e) => setDisturbanceType(e.target.value as DisturbanceType)}
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-sm"
+              title="Select disturbance type"
             >
               <option value={DisturbanceType.Fire}>Fire</option>
               <option value={DisturbanceType.Drought}>Drought</option>
@@ -243,6 +247,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               value={disturbanceIntensity}
               onChange={(e) => setDisturbanceIntensity(parseFloat(e.target.value))}
               className="w-full"
+              title="Disturbance intensity"
             />
             
             <div className="flex items-center justify-between">
@@ -257,6 +262,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               value={disturbanceDuration}
               onChange={(e) => setDisturbanceDuration(parseInt(e.target.value))}
               className="w-full"
+              title="Disturbance duration"
             />
           </div>
         </div>

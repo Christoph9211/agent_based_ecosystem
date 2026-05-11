@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Dices, Leaf, FileDown, FileUp, Info, RotateCcw, Settings } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Dices, Leaf, Info, RotateCcw } from 'lucide-react';
 import useSimulation from './hooks/useSimulation';
 import SimulationGrid from './components/SimulationGrid';
 import ControlPanel from './components/ControlPanel';
@@ -117,10 +117,10 @@ function App() {
   // Count organisms by type
   const producerCount = Object.values(state.organisms).filter(o => o.type === 'Producer').length;
   const herbivoreCount = Object.values(state.organisms).filter(
-    o => o.type === 'Consumer' && o.consumerType === 'Herbivore'
+    o => o.type === 'Consumer' && 'consumerType' in o && o.consumerType === 'Herbivore'
   ).length;
   const carnivoreCount = Object.values(state.organisms).filter(
-    o => o.type === 'Consumer' && o.consumerType === 'Carnivore'
+    o => o.type === 'Consumer' && 'consumerType' in o && o.consumerType === 'Carnivore'
   ).length;
   const decomposerCount = Object.values(state.organisms).filter(o => o.type === 'Decomposer').length;
   
@@ -279,7 +279,6 @@ function App() {
               onRandomRestart={handleRandomRestart}
               onSave={handleSave}
               onToggleAutoRestart={toggleAutoRestart}
-              onConfigChange={() => {}}
             />
           </div>
           
@@ -352,6 +351,7 @@ function App() {
                 value={graphTimespan}
                 onChange={(e) => setGraphTimespan(parseInt(e.target.value))}
                 className="text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 p-1"
+                title="Select timespan for graph display"
               >
                 <option value="25">25 days</option>
                 <option value="50">50 days</option>
